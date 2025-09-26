@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Cryptocurrency Matching Engine — Advanced Trading Interface</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            font-size: 14px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .status-label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-value {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .status-connected { color: #10b981; }
+        .status-disconnected { color: #ef4444; }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 400px 1fr 350px;
+            gap: 2rem;
+            min-height: calc(100vh - 100px);
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .bbo-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .bbo-item {
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bbo-bid {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .bbo-ask {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .bbo-label {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bbo-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .orderbook {
+            height: 400px;
+            overflow-y: auto;
+        }
+
+        .orderbook-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .orderbook-header {
+            background: #f8fafc;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .orderbook-header th {
+            padding: 0.75rem 0.5rem;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .orderbook-row {
+            transition: background-color 0.2s ease;
+        }
+
+        .orderbook-row:hover {
+            background-color: rgba(102, 126, 234, 0.05);
+        }
+
+        .orderbook-cell {
+            padding: 0.5rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .asks .orderbook-cell:first-child {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .bids .orderbook-cell:first-child {
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .trade-feed {
+            height: 500px;
+            overflow-y: auto;
+        }
+
+        .trade-item {
+            padding: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .trade-item:hover {
+            background-color: #f8fafc;
+            border-left-color: #667eea;
+        }
+
+        .trade-item.new-trade {
+            animation: slideIn 0.5s ease, highlight 2s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes highlight {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: rgba(102, 126, 234, 0.1); }
+        }
+
+        .trade-symbol {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .trade-price {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-weight: 700;
+            margin-left: 0.5rem;
+        }
+
+        .trade-quantity {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .trade-meta {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .aggressor-buy {
+            color: #059669;
+        }
+
+        .aggressor-sell {
+            color: #dc2626;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-item {
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .symbol-selector {
+            margin-bottom: 1.5rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .alert-success {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .alert-error {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .status-bar {
+                gap: 1rem;
+            }
+        }
+        .alert-info {
+    background-color: #e0f2fe;
+    color: #0c4a6e;
+    border: 1px solid #7dd3fc;
+}
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                Matching Engine Pro
+            </div>
+            <div class="status-bar">
+                <div class="status-item">
+                    <div class="status-label">Connection</div>
+                    <div id="conn-status" class="status-value status-disconnected">Disconnected</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Latency</div>
+                    <div id="latency" class="status-value">-- ms</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Orders</div>
+                    <div id="order-count" class="status-value">0</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Trades</div>
+                    <div id="trade-count" class="status-value">0</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Order Entry Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-plus-circle"></i>
+                    Order Entry
+                </div>
+            </div>
+
+            <div id="order-alert" class="alert" style="display: none;"></div>
+
+            <div class="symbol-selector">
+                <label class="form-label">Trading Symbol</label>
+                <select id="symbol" class="form-select">
+                    <option value="BTC-USDT">BTC-USDT</option>
+                    <option value="ETH-USDT">ETH-USDT</option>
+                    <option value="BNB-USDT">BNB-USDT</option>
+                    <option value="SOL-USDT">SOL-USDT</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Side</label>
+                    <select id="side" class="form-select">
+                        <option value="buy">Buy</option>
+                        <option value="sell">Sell</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Order Type</label>
+                    <select id="order_type" class="form-select">
+                        <option value="limit">Limit</option>
+                        <option value="market">Market</option>
+                        <option value="ioc">IOC</option>
+                        <option value="fok">FOK</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Quantity</label>
+                <input id="quantity" type="number" step="any" class="form-input" placeholder="e.g. 0.001">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Price (for Limit orders)</label>
+                <input id="price" type="number" step="any" class="form-input" placeholder="e.g. 30000.00">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Client Order ID (optional)</label>
+                <input id="client_order_id" type="text" class="form-input" placeholder="Custom order identifier">
+            </div>
+
+            <button id="submitBtn" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i>
+                Submit Order
+            </button>
+
+            <hr style="margin: 2rem 0; border: none; height: 1px; background: #e2e8f0;">
+
+            <div class="panel-header" style="margin-bottom: 1rem;">
+                <div class="panel-title">
+                    <i class="fas fa-times-circle"></i>
+                    Cancel Order
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Order ID</label>
+                <input id="cancel_order_id" type="text" class="form-input" placeholder="Order ID to cancel">
+            </div>
+
+            <button id="cancelBtn" class="btn btn-danger">
+                <i class="fas fa-ban"></i>
+                Cancel Order
+            </button>
+        </div>
+
+        <!-- Market Data Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-chart-area"></i>
+                    Market Data
+                </div>
+                <div id="current-symbol" style="font-weight: 600; color: #667eea;">BTC-USDT</div>
+            </div>
+
+            <!-- Best Bid/Offer Display -->
+            <div class="bbo-display">
+                <div class="bbo-item bbo-bid">
+                    <div class="bbo-label">Best Bid</div>
+                    <div id="best_bid" class="bbo-price">--</div>
+                </div>
+                <div class="bbo-item bbo-ask">
+                    <div class="bbo-label">Best Ask</div>
+                    <div id="best_ask" class="bbo-price">--</div>
+                </div>
+            </div>
+
+            <!-- Statistics Grid -->
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div id="spread" class="stat-value">--</div>
+                    <div class="stat-label">Spread</div>
+                </div>
+                <div class="stat-item">
+                    <div id="mid_price" class="stat-value">--</div>
+                    <div class="stat-label">Mid Price</div>
+                </div>
+            </div>
+
+            <!-- Order Book -->
+            <div class="panel-header" style="margin-bottom: 0.5rem;">
+                <div class="panel-title" style="font-size: 1rem;">
+                    <i class="fas fa-list"></i>
+                    Order Book
+                </div>
+            </div>
+
+            <div class="orderbook">
+                <table class="orderbook-table">
+                    <thead class="orderbook-header">
+                        <tr>
+                            <th>Price</th>
+                            <th>Size</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="asks_table_body">
+                        <!-- Asks will be populated here -->
+                    </tbody>
+                </table>
+                
+                <div style="text-align: center; padding: 0.5rem; background: #f8fafc; font-weight: 600; color: #64748b; font-size: 0.8rem;">
+                    --- SPREAD ---
+                </div>
+                
+                <table class="orderbook-table">
+                    <tbody id="bids_table_body">
+                        <!-- Bids will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Trade Feed Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-exchange-alt"></i>
+                    Live Trades
+                </div>
+                <button id="clear-trades" style="padding: 0.25rem 0.5rem; border: none; background: #e2e8f0; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">
+                    Clear
+                </button>
+            </div>
+
+            <div class="trade-feed" id="trade_feed">
+                <div style="text-align: center; color: #64748b; padding: 2rem;">
+                    <i class="fas fa-clock"></i>
+                    <div style="margin-top: 0.5rem;">Waiting for trades...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;"></div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="./main.js"></script>
+</body>
+</html>
