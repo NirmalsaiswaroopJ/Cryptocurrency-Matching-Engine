@@ -292,7 +292,7 @@ socket.on("trade", (trade) => {
 | `trade` | Trade execution events |
 | `order_event` | Order status changes |
 
-For detailed API specification, see [Documentation/CME_API Specification.pdf](Documentation).
+For detailed API specification, see [Documentation](Documentation).
 
 ## Performance Analysis
 
